@@ -10,17 +10,17 @@ Użytkownicy w organizacji nie mają aktualnej bazy budynków Polski, co skutkuj
 
 ## 3. Wymagania funkcjonalne
 F1. Ręczne dodawanie budynków z danymi:
-  - numer budynku, typ (jednorodzinny/wielorodzinny), hierarchia TERYT (województwo → powiat → gmina → miejscowość → część/dzielnica → ulica), współrzędne (WGS84, 5 miejsc, zakres: Lon 14.1–24.1, Lat 49.0–54.8), dane dostawcy (nazwa, technologia, przepustowość).
-F2. CRUD słowników TERYT: województwa, powiaty, gminy, miejscowości, części/dzielnice, ulice.
+  - numer budynku, typ (jednorodzinny/wielorodzinny), hierarchia TERYT (województwo → powiat → gmina → miejscowość → część/dzielnica (opcjonalnie) → ulica (opcjonalnie)). Nie wszystkie miejscowości posiadają ulice. Miasto Warszawa posiada gminy, miasta Wrocław, Poznań, Łódź, Kraków dzielnice - dla tych miast będzie wybierana gmina/dzielnica. Tylko niektóre miejscowości posiadają części miejscowości. Współrzędne (WGS84, 5 miejsc, zakres: Lon 14.1–24.1, Lat 49.0–54.8), dane dostawcy (nazwa, technologia, przepustowość).
+F2. CRUD słowników TERYT: województwa, powiaty, gminy, miejscowości, części miejscowości, gmina/dzielnice (Warszawa, Poznań, Łódź, Kraków, Wrocław), ulice.
 F3. Zarządzanie rolami i użytkownikami:
   - role ADMIN (zarządzanie użytkownikami i rolami), WRITE (CRUD budynków i słowników), READ (tylko odczyt), pierwsze konto ADMIN tworzone ręcznie.
 F4. Autentykacja i autoryzacja:
   - Supabase Auth, tokeny w HttpOnly Secure cookies, timeout sesji, endpoint wylogowania.
 F5. Wyszukiwanie budynków:
   - Autouzupełnianie po nazwie miejscowości lub ulicy (min. 2 znaki, debounce 300 ms).
-  - Wyszukiwanie po kodach TERYT + ulica + numer budynku.
+  - Wyszukiwanie po kodach nazwie miejscowości + nazwie części miejscowości (opcjonalnie) + nazwie gminy/dzielnicy (opcjonalnie) + ulica (opcjonalnie) + numer budynku.
 F6. Publiczne REST API `/api/v1/…`:
-  - Odczyt parametrów budynku: współrzędne X/Y, dostawca, technologia, przepustowość.
+  - Odczyt parametrów budynku: współrzędne longtitude/latitude, dostawca, technologia, przepustowość.
   - Klucze API z rotacją, limit 10 zapytań/godz., nagłówek `Idempotency-Key`, HTTP 429 z `Retry-After`.
   - Paginacja: parametry `page`, `pageSize` (domyślnie 20, max 100), odpowiedź zawiera `totalCount`.
 F7. Audyt i logowanie zmian:
@@ -31,7 +31,7 @@ F8. Usuwanie:
   - Twarde usunięcia z modalem potwierdzającym.
 F9. Spójność danych:
   - Optimistic locking (`version` lub `updated_at`).
-  - Unikatowy indeks na (teryt_miejscowosci, teryt_ulicy, numer_budynku).
+  - Unikatowy indeks na (teryt_miejscowości, teryt_części miejscowości, teryt_dzielnicy, teryt_ulicy, numer_budynku).
 
 ## 4. Granice produktu
 W zakresie MVP:
@@ -45,7 +45,7 @@ W zakresie MVP:
 Poza zakresem MVP:
 - Automatyczne pozyskiwanie danych o budynkach.
 - Masowe ładowanie budynków.
-- Zewnętrzny słownik dostawców.
+- Zewnętrzny słownik dostawców internetu szerokopasmowego.
 - Automatyczne wybieranie dostawcy z największą przepustowością.
 
 ## 5. Historyjki użytkowników
@@ -96,16 +96,16 @@ Poza zakresem MVP:
 
 - ID: US-007
   Tytuł: Wyszukiwanie budynków (autocomplete)
-  Opis: Jako użytkownik z READ chcę wyszukiwać budynki po nazwie miejscowości lub ulicy z autouzupełnianiem, aby szybko znaleźć interesujące mnie rekordy.
+  Opis: Jako użytkownik z READ chcę wyszukiwać budynki po nazwie miejscowości i ulicy z autouzupełnianiem, aby szybko znaleźć interesujące mnie rekordy.
   Kryteria akceptacji:
   - Wpisanie ≥ 2 znaków wyzwala zapytanie po 300 ms.
   - Wyświetlane są podpowiedzi dopasowane do wpisu.
 
 - ID: US-008
   Tytuł: Wyszukiwanie budynków (kod TERYT)
-  Opis: Jako użytkownik z READ chcę wyszukiwać budynek po kodach TERYT, nazwie ulicy i numerze, aby precyzyjnie odnaleźć rekord.
+  Opis: Jako użytkownik z READ chcę wyszukiwać budynek po kodach TERYT miejscowości i ulicy, numerze budynku, aby precyzyjnie odnaleźć rekord.
   Kryteria akceptacji:
-  - Użytkownik wprowadza kombinację kodów i numer.
+  - Użytkownik wprowadza kombinację kodów i numer budynku.
   - System zwraca dokładny wynik lub brak wyników.
 
 - ID: US-009
