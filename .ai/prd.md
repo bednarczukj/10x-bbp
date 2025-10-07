@@ -20,7 +20,7 @@ F5. Wyszukiwanie budynków:
   - Autouzupełnianie po nazwie miejscowości lub ulicy (min. 2 znaki, debounce 300 ms).
   - Wyszukiwanie po kodach nazwie miejscowości + nazwie części miejscowości (opcjonalnie) + nazwie gminy/dzielnicy (opcjonalnie) + ulica (opcjonalnie) + numer budynku.
 F6. Publiczne REST API `/api/v1/…`:
-  - Odczyt parametrów budynku: współrzędne longtitude/latitude, dostawca, technologia, przepustowość.
+  - Odczyt parametrów budynku: współrzędne longitude/latitude, dostawca, technologia, przepustowość.
   - Klucze API z rotacją, limit 10 zapytań/godz., nagłówek `Idempotency-Key`, HTTP 429 z `Retry-After`.
   - Paginacja: parametry `page`, `pageSize` (domyślnie 20, max 100), odpowiedź zawiera `totalCount`.
 F7. Audyt i logowanie zmian:
